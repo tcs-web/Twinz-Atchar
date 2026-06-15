@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Twinz Atchar & Empire - Wholesale Catalog</title>
+<title>Twinz Atchar Empire - Wholesale Catalog</title>
 <style>
 :root{--bg:#fff9f0;--card:#ffffff;--accent:#d97706;--green:#16a34a;--red:#dc2626;--blue:#2563eb;--text:#1a1a1a;--muted:#6b7280}
 body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;padding-bottom:100px}
@@ -29,6 +29,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 .btn-whatsapp{background:#25D366}
 .btn-secondary{background:#374151;font-size:12px}
 .btn-blue{background:var(--blue)}
+.btn-purple{background:#7c3aed}
 .section-title{font-size:18px;margin:20px 0 10px 0;color:var(--accent);border-left:4px solid var(--accent);padding-left:10px}
 .company{font-size:11px;color:var(--muted);text-align:center;margin:20px 0;line-height:1.6}
 .qty-input{width:60px;padding:5px;border:1px solid #ccc;border-radius:4px;text-align:center;margin:0 5px}
@@ -40,7 +41,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 
 /* Modal Styles */
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
-.modal-content{background:var(--card);margin:10% auto;padding:20px;border-radius:12px;width:90%;max-width:500px;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.modal-content{background:var(--card);margin:5% auto;padding:20px;border-radius:12px;width:90%;max-width:500px;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
 .modal-content h3{color:var(--accent);margin-top:0}
 .close{float:right;font-size:24px;font-weight:bold;cursor:pointer;color:var(--muted)}
 .close:hover{color:var(--text)}
@@ -53,6 +54,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 .status-step.completed .circle{background:var(--accent)}
 .status-step p{font-size:10px;margin-top:5px}
 .status-line{position:absolute;top:20px;left:20%;right:20%;height:2px;background:#d1d5db;z-index:1}
+
+/* Invoice Styles */
+.invoice-table{width:100%;border-collapse:collapse;margin:15px 0;font-size:12px}
+.invoice-table th{background:var(--accent);color:white;padding:8px;text-align:left}
+.invoice-table td{border:1px solid #ddd;padding:8px}
+.invoice-total{background:#fef3c7;font-weight:bold;font-size:14px}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -183,6 +190,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 
 </div>
 
+<div class="section-title">🧾 Invoice Generator</div>
+<div class="card">
+  <h3>Create Invoice for Client</h3>
+  <input id="clientName" placeholder="Client/Shop Name" style="width:100%;padding:8px;margin:5px 0">
+  <input id="clientPhone" placeholder="Client Phone" style="width:100%;padding:8px;margin:5px 0">
+  <input id="clientAddress" placeholder="Delivery Address" style="width:100%;padding:8px;margin:5px 0">
+  <button class="btn btn-purple" onclick="generateInvoicePDF()">📄 Generate Invoice PDF</button>
+  <button class="btn btn-whatsapp" onclick="sendInvoiceWhatsApp()">📱 Send Invoice via WhatsApp</button>
+</div>
+
 <div class="card" style="background:#fef3c7;border:2px solid var(--accent)">
   <h3>🎯 Why Shops Choose Twinz</h3>
   <p>✅ <b>Affordable pricing</b> - We beat Checkers/Shoprite wholesale prices<br>
@@ -276,7 +293,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 let cart = [];
 let total = 0;
 let specialActive = false;
-let deliveryStep = 2; // 1=Received, 2=Preparing, 3=OnRoad, 4=Delivered
+let deliveryStep = 2;
+let invoiceNo = 'TWZ-INV-' + Date.now().toString().slice(-6);
 
 function addToCart(name, price, qtyId) {
   let qty = parseInt(document.getElementById(qtyId).value);
@@ -364,7 +382,126 @@ function toggleStock(cardId) {
   btn.disabled = card.classList.contains('oos');
 }
 
-// Close modal when clicking outside
+// INVOICE PDF GENERATOR
+function generateInvoicePDF() {
+  let clientName = document.getElementById('clientName').value || 'Customer';
+  let clientPhone = document.getElementById('clientPhone').value || '---';
+  let clientAddress = document.getElementById('clientAddress').value || '---';
+  
+  if(cart.length === 0) {
+    alert('Add items to cart first before generating invoice');
+    return;
+  }
+  
+  let itemsHTML = cart.map(item => `
+    <tr>
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>R${item.price.toLocaleString()}</td>
+      <td>R${item.subtotal.toLocaleString()}</td>
+    </tr>
+  `).join('');
+  
+  let vat = Math.round(total * 0.15);
+  let subtotal = total - vat;
+  
+  let invoiceHTML = `
+    <html>
+    <head>
+      <title>Invoice ${invoiceNo}</title>
+      <style>
+        body{font-family:Arial;font-size:12px;padding:20px;color:#333}
+        .header{background:#d97706;color:white;padding:15px;text-align:center}
+        .header h2{margin:0}
+        .info{margin:20px 0;display:flex;justify-content:space-between}
+        .info div{width:48%}
+        table{width:100%;border-collapse:collapse;margin:20px 0}
+        th{background:#d97706;color:white;padding:10px;text-align:left}
+        td{border:1px solid #ddd;padding:8px}
+        .total-row{background:#fef3c7;font-weight:bold}
+        .footer{margin-top:30px;font-size:10px;color:#666;text-align:center;border-top:2px solid #d97706;padding-top:15px}
+        .bank{margin-top:20px;padding:15px;background:#f0f9ff;border:2px solid #2563eb}
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h2>TWINZ COOPERATE SERVICES PTY LTD</h2>
+        <p>INVOICE</p>
+      </div>
+      
+      <div class="info">
+        <div>
+          <b>From:</b><br>
+          Twinz Cooperate Services Pty Ltd<br>
+          Reg: 2024/444303/07 | VAT: 9819040198<br>
+          Burgersfort, P.O BOX 638, 1150<br>
+          Praktiseer Stand NO 3211 Ext 02<br>
+          Tel: 068 254 7352 | 069 894 9596<br>
+          Email: twinz.cooperate.services@gmail.com
+        </div>
+        <div>
+          <b>To:</b><br>
+          ${clientName}<br>
+          ${clientAddress}<br>
+          Tel: ${clientPhone}<br><br>
+          <b>Invoice No:</b> ${invoiceNo}<br>
+          <b>Date:</b> ${new Date().toLocaleDateString()}<br>
+          <b>Due Date:</b> ${new Date(Date.now() + 7*24*60*60*1000).toLocaleDateString()}
+        </div>
+      </div>
+      
+      <table>
+        <tr>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Total</th>
+        </tr>
+        ${itemsHTML}
+        <tr class="total-row">
+          <td colspan="3">Subtotal (Excl VAT 15%)</td>
+          <td>R${subtotal.toLocaleString()}</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="3">VAT 15%</td>
+          <td>R${vat.toLocaleString()}</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="3">TOTAL AMOUNT DUE</td>
+          <td>R${total.toLocaleString()}</td>
+        </tr>
+      </table>
+      
+      <div class="bank">
+        <b>Banking Details:</b><br>
+        Bank: Standard Bank<br>
+        Account Name: TWINZ COOPERATE SERVICES PTY LTD<br>
+        Account Number: 10 26 459 443 4<br>
+        Branch Code: 006145<br>
+        Reference: ${clientName} ${invoiceNo}
+      </div>
+      
+      <div class="footer">
+        <b>Terms:</b> Payment due within 7 days. Goods remain property of Twinz until paid in full.<br>
+        Thank you for your business! | © 2026 Twinz Cooperate Services Pty Ltd
+      </div>
+    </body>
+    </html>
+  `;
+  
+  let win = window.open('', '_blank');
+  win.document.write(invoiceHTML);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 500);
+}
+
+function sendInvoiceWhatsApp() {
+  let clientName = document.getElementById('clientName').value || 'Customer';
+  let msg = `Hello ${clientName}, please find your Twinz Atchar invoice attached.\n\nInvoice No: ${invoiceNo}\nAmount: R${total.toLocaleString()}\n\nClick "Generate Invoice PDF" button above, save as PDF, then send it back here.\n\nBanking details are on the invoice. Thank you!`;
+  window.open(`https://wa.me/27682547352?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
 window.onclick = function(event) {
   if(event.target.classList.contains('modal')) {
     event.target.style.display = 'none';
