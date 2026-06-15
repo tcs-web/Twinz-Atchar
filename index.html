@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twinz Atchar & Empire - Wholesale Catalog</title>
+<style>
+:root{--bg:#fff9f0;--card:#ffffff;--accent:#d97706;--green:#16a34a;--red:#dc2626;--blue:#2563eb;--text:#1a1a1a;--muted:#6b7280}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;padding-bottom:100px}
+.header{background:linear-gradient(135deg,#d97706,#b45309);color:white;padding:20px;text-align:center;position:relative}
+.header h1{margin:0;font-size:22px}
+.header p{margin:5px 0;font-size:12px}
+.special-banner{background:#fef3c7;color:#92400e;padding:10px;text-align:center;font-weight:bold;font-size:13px;border-bottom:3px solid var(--accent);display:none}
+.special-banner.show{display:block}
+.container{padding:15px;max-width:900px;margin:0 auto}
+.badge{background:var(--green);color:white;padding:4px 8px;border-radius:20px;font-size:10px;display:inline-block;margin:3px}
+.badge.red{background:var(--red)}
+.badge.blue{background:var(--blue)}
+.card{background:var(--card);border-radius:12px;padding:12px;margin:10px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1);position:relative}
+.card.oos{opacity:0.5}
+.card.oos::after{content:'OUT OF STOCK';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);background:var(--red);color:white;padding:8px 20px;font-weight:bold;border-radius:5px;font-size:14px;z-index:10}
+.card img{width:100%;height:180px;object-fit:cover;border-radius:8px;margin-bottom:8px}
+.card h3{margin:5px 0;color:var(--accent);font-size:16px}
+.price{font-size:18px;font-weight:bold;color:var(--green)}
+.old-price{text-decoration:line-through;color:var(--muted);font-size:12px;margin-left:5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.btn{background:var(--accent);color:white;border:none;padding:10px 15px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;margin-top:8px}
+.btn:disabled{background:var(--muted);cursor:not-allowed}
+.btn-whatsapp{background:#25D366}
+.btn-secondary{background:#374151;font-size:12px}
+.btn-blue{background:var(--blue)}
+.section-title{font-size:18px;margin:20px 0 10px 0;color:var(--accent);border-left:4px solid var(--accent);padding-left:10px}
+.company{font-size:11px;color:var(--muted);text-align:center;margin:20px 0;line-height:1.6}
+.qty-input{width:60px;padding:5px;border:1px solid #ccc;border-radius:4px;text-align:center;margin:0 5px}
+.cart{position:fixed;bottom:0;left:0;right:0;background:var(--card);padding:12px;border-top:2px solid var(--accent);box-shadow:0 -2px 10px rgba(0,0,0,0.1)}
+.cart-total{font-size:18px;font-weight:bold;color:var(--green)}
+.admin-panel{background:#f3f4f6;padding:10px;border-radius:8px;margin:15px 0;border:1px dashed var(--accent)}
+.admin-panel h4{margin:5px 0;font-size:13px}
+.toggle-btn{background:#6b7280;color:white;border:none;padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer;margin-left:5px}
+
+/* Modal Styles */
+.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
+.modal-content{background:var(--card);margin:10% auto;padding:20px;border-radius:12px;width:90%;max-width:500px;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.modal-content h3{color:var(--accent);margin-top:0}
+.close{float:right;font-size:24px;font-weight:bold;cursor:pointer;color:var(--muted)}
+.close:hover{color:var(--text)}
+.bank-details{background:#f0f9ff;border:2px solid var(--blue);padding:15px;border-radius:8px;margin:15px 0}
+.bank-details p{margin:5px 0;font-size:13px}
+.status-tracker{display:flex;justify-content:space-between;margin:20px 0;position:relative}
+.status-step{flex:1;text-align:center;position:relative;z-index:2}
+.status-step .circle{width:40px;height:40px;border-radius:50%;background:#d1d5db;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-weight:bold}
+.status-step.active .circle{background:var(--green)}
+.status-step.completed .circle{background:var(--accent)}
+.status-step p{font-size:10px;margin-top:5px}
+.status-line{position:absolute;top:20px;left:20%;right:20%;height:2px;background:#d1d5db;z-index:1}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="special-banner" id="specialBanner">
+🎉 JUNE SPECIAL: Buy 2 Supermarket Packs, Get 1 Case Mango Atchar FREE! Valid till 30 June 2026
+</div>
+
+<div class="header">
+  <h1>🥭 TWINZ ATCHAR & EMPIRE</h1>
+  <p>Wholesale Supplier | Burgersfort | Affordable Packages for Shops & Supermarkets</p>
+  <span class="badge">Free Delivery 20km</span>
+  <span class="badge">Bulk Discounts</span>
+  <span class="badge blue">EFT Accepted</span>
+</div>
+
+<div class="container">
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel">
+  <h4>⚙️ Admin Controls</h4>
+  <button class="btn-secondary" onclick="toggleSpecial()">Toggle Monthly Special</button>
+  <button class="btn-blue" onclick="openDeliveryTracker()">Update Delivery Status</button>
+  <small style="margin-left:10px">Click each card's "OOS" button to mark Out of Stock</small>
+</div>
+
+<div class="section-title">🏪 Shop Starter Packs - Affordable</div>
+<div class="grid">
+
+<div class="card" id="cardA">
+  <button class="toggle-btn" onclick="toggleStock('cardA')">OOS</button>
+  <img src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=500" alt="Atchar Mix">
+  <h3>Shop Starter Pack A - R450</h3>
+  <p><b>Perfect for spaza shops</b><br>
+ 12x 380g Mango Atchar<br>
+ 12x 380g Chakalaka Atchar<br>
+ 6x 1L Empire Hot Sauce<br>
+ Display box + Price list included</p>
+  <div><span class="price">R450</span> <span class="old-price">R540</span> <small>Save R90</small></div>
+  <div style="margin-top:8px">Qty: <input type="number" class="qty-input" id="packA" value="0" min="0"></div>
+  <button class="btn" id="btnA" onclick="addToCart('Shop Starter Pack A', 450, 'packA')">Add to Order</button>
+</div>
+
+<div class="card" id="cardB">
+  <button class="toggle-btn" onclick="toggleStock('cardB')">OOS</button>
+  <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058c?w=500" alt="Empire Sauce">
+  <h3>Shop Starter Pack B - R680</h3>
+  <p><b>Bigger shops + tuckshops</b><br>
+ 24x 380g Mixed Atchar<br>
+ 12x 1L Empire Sauce<br>
+ 24x 250g Chilli Atchar<br>
+ Free shelf stickers + Banner</p>
+  <div><span class="price">R680</span> <span class="old-price">R820</span> <small>Save R140</small></div>
+  <div style="margin-top:8px">Qty: <input type="number" class="qty-input" id="packB" value="0" min="0"></div>
+  <button class="btn" id="btnB" onclick="addToCart('Shop Starter Pack B', 680, 'packB')">Add to Order</button>
+</div>
+
+</div>
+
+<div class="section-title">🛒 Supermarket Bulk Packs</div>
+<div class="grid">
+
+<div class="card" id="cardS1">
+  <button class="toggle-btn" onclick="toggleStock('cardS1')">OOS</button>
+  <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500" alt="Bulk Atchar">
+  <h3>Supermarket Pack 1 - R1,250</h3>
+  <p><b>Small supermarkets</b><br>
+ 48x 380g Mango Atchar<br>
+ 48x 380g Chakalaka Atchar<br>
+ 24x 1L Empire Sauce<br>
+ 12x 5L Refill Jugs<br>
+ Promotional material included</p>
+  <div><span class="price">R1,250</span> <span class="old-price">R1,520</span> <small>Save R270</small></div>
+  <div style="margin-top:8px">Qty: <input type="number" class="qty-input" id="super1" value="0" min="0"></div>
+  <button class="btn" id="btnS1" onclick="addToCart('Supermarket Pack 1', 1250, 'super1')">Add to Order</button>
+</div>
+
+<div class="card" id="cardS2">
+  <button class="toggle-btn" onclick="toggleStock('cardS2')">OOS</button>
+  <img src="https://images.unsplash.com/photo-1547592180-85f173990888?w=500" alt="Empire Bulk">
+  <h3>Supermarket Pack 2 - R2,100</h3>
+  <p><b>High volume stores</b><br>
+ 96x 380g Mixed Atchar<br>
+ 48x 1L Empire Sauce Hot/Medium/Mild<br>
+ 48x 250g Chilli Atchar<br>
+ 24x 5L Refill Jugs<br>
+ Free shelf wobblers + Demo day</p>
+  <div><span class="price">R2,100</span> <span class="old-price">R2,580</span> <small>Save R480</small></div>
+  <div style="margin-top:8px">Qty: <input type="number" class="qty-input" id="super2" value="0" min="0"></div>
+  <button class="btn" id="btnS2" onclick="addToCart('Supermarket Pack 2', 2100, 'super2')">Add to Order</button>
+</div>
+
+</div>
+
+<div class="section-title">📦 Single Items - Build Your Own Pack</div>
+<div class="grid">
+
+<div class="card" id="cardMango">
+  <button class="toggle-btn" onclick="toggleStock('cardMango')">OOS</button>
+  <img src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=500" alt="Mango Atchar">
+  <h3>Mango Atchar 380g</h3>
+  <p>12 units per case | R32 each wholesale<br>Retail: R45-R50 | Profit: R13-R18 per unit</p>
+  <div><span class="price">R384/case</span></div>
+  <div style="margin-top:8px">Cases: <input type="number" class="qty-input" id="mango" value="0" min="0"></div>
+  <button class="btn" id="btnMango" onclick="addToCart('Mango Atchar 380g x12', 384, 'mango')">Add</button>
+</div>
+
+<div class="card" id="cardEmpire">
+  <button class="toggle-btn" onclick="toggleStock('cardEmpire')">OOS</button>
+  <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058c?w=500" alt="Empire Sauce">
+  <h3>Empire Sauce 1L</h3>
+  <p>12 units per case | R48 each wholesale<br>Retail: R65-R70 | Profit: R17-R22 per unit</p>
+  <div><span class="price">R576/case</span></div>
+  <div style="margin-top:8px">Cases: <input type="number" class="qty-input" id="empire" value="0" min="0"></div>
+  <button class="btn" id="btnEmpire" onclick="addToCart('Empire Sauce 1L x12', 576, 'empire')">Add</button>
+</div>
+
+<div class="card" id="cardChilli">
+  <button class="toggle-btn" onclick="toggleStock('cardChilli')">OOS</button>
+  <img src="https://images.unsplash.com/photo-1547592180-85f173990888?w=500" alt="Chilli Atchar">
+  <h3>Chilli Atchar 250g</h3>
+  <p>24 units per case | R22 each wholesale<br>Retail: R32-R35 | Profit: R10-R13 per unit</p>
+  <div><span class="price">R528/case</span></div>
+  <div style="margin-top:8px">Cases: <input type="number" class="qty-input" id="chilli" value="0" min="0"></div>
+  <button class="btn" id="btnChilli" onclick="addToCart('Chilli Atchar 250g x24', 528, 'chilli')">Add</button>
+</div>
+
+</div>
+
+<div class="card" style="background:#fef3c7;border:2px solid var(--accent)">
+  <h3>🎯 Why Shops Choose Twinz</h3>
+  <p>✅ <b>Affordable pricing</b> - We beat Checkers/Shoprite wholesale prices<br>
+  ✅ <b>Fast delivery</b> - Burgersfort + 20km radius free delivery<br>
+  ✅ <b>Marketing support</b> - Shelf stickers, banners, price cards free<br>
+  ✅ <b>Consistent stock</b> - Weekly production, never out of stock<br>
+  ✅ <b>Good profit margin</b> - 30-40% profit for retailers</p>
+</div>
+
+<div class="company">
+  <b>TWINZ COOPERATE SERVICES PTY LTD</b><br>
+  Company Reg: 2024/444303/07 | VAT: 9819040198<br>
+  Physical: Burgersfort, P.O BOX 638, 1150, Praktiseer Stand NO 3211 Ext 02<br>
+  📞 <b>068 254 7352</b> | 📞 <b>069 894 9596</b><br>
+  📧 <b>twinz.cooperate.services@gmail.com</b><br>
+  WhatsApp Orders Available 7 Days
+</div>
+
+</div>
+
+<div class="cart" id="cartBox" style="display:none">
+  <div><b>Your Order:</b> <span id="cartItems">0 items</span></div>
+  <div class="cart-total">Total: R<span id="cartTotal">0</span></div>
+  <button class="btn btn-whatsapp" onclick="sendWhatsAppOrder()">📱 Send Order via WhatsApp</button>
+  <button class="btn btn-blue" onclick="openPaymentModal()">💳 View EFT Details</button>
+</div>
+
+<!-- EFT Payment Modal -->
+<div id="paymentModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closePaymentModal()">&times;</span>
+    <h3>💳 EFT Payment Details - Twinz Cooperate Services</h3>
+    <p>Use this for orders over R500. Send POP to WhatsApp after payment.</p>
+    
+    <div class="bank-details">
+      <p><b>Bank:</b> Standard Bank</p>
+      <p><b>Account Name:</b> TWINZ COOPERATE SERVICES PTY LTD</p>
+      <p><b>Account Number:</b> 10 26 459 443 4</p>
+      <p><b>Branch Code:</b> 006145</p>
+      <p><b>Account Type:</b> Business Current Account</p>
+      <p><b>Reference:</b> Use your Shop Name + Invoice No</p>
+    </div>
+    
+    <p style="font-size:12px;color:var(--muted)">
+      <b>Delivery Policy:</b> Goods dispatched after payment reflects. 
+      EFT orders: 24-48hrs. Cash on Delivery available for orders under R500.
+    </p>
+    
+    <button class="btn btn-whatsapp" onclick="sendPOPWhatsApp()">📱 Send POP via WhatsApp</button>
+  </div>
+</div>
+
+<!-- Delivery Tracker Modal -->
+<div id="deliveryModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeDeliveryModal()">&times;</span>
+    <h3>🚚 Delivery Status Tracker</h3>
+    <p style="font-size:12px">Order #: <span id="orderNum">TWZ-ORD-001</span></p>
+    
+    <div class="status-tracker">
+      <div class="status-line"></div>
+      <div class="status-step completed" id="step1">
+        <div class="circle">1</div>
+        <p>Order Received</p>
+      </div>
+      <div class="status-step active" id="step2">
+        <div class="circle">2</div>
+        <p>Preparing</p>
+      </div>
+      <div class="status-step" id="step3">
+        <div class="circle">3</div>
+        <p>On the Road</p>
+      </div>
+      <div class="status-step" id="step4">
+        <div class="circle">4</div>
+        <p>Delivered</p>
+      </div>
+    </div>
+    
+    <div style="margin-top:20px;font-size:13px">
+      <p><b>Current Status:</b> <span id="currentStatus">Preparing your order</span></p>
+      <p><b>Estimated Delivery:</b> <span id="estDelivery">Today 14:00-16:00</span></p>
+      <p><b>Driver Contact:</b> 068 254 7352</p>
+    </div>
+    
+    <button class="btn btn-secondary" onclick="updateStatus()">Update to "On the Road"</button>
+  </div>
+</div>
+
+<script>
+let cart = [];
+let total = 0;
+let specialActive = false;
+let deliveryStep = 2; // 1=Received, 2=Preparing, 3=OnRoad, 4=Delivered
+
+function addToCart(name, price, qtyId) {
+  let qty = parseInt(document.getElementById(qtyId).value);
+  if(qty <= 0) { alert('Enter quantity first'); return; }
+  
+  cart.push({name, price, qty, subtotal: price * qty});
+  updateCart();
+  document.getElementById(qtyId).value = 0;
+  alert(name + ' x' + qty + ' added to order');
+}
+
+function updateCart() {
+  total = cart.reduce((sum, item) => sum + item.subtotal, 0);
+  let itemCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  
+  document.getElementById('cartItems').innerText = itemCount + ' items';
+  document.getElementById('cartTotal').innerText = total.toLocaleString();
+  document.getElementById('cartBox').style.display = total > 0 ? 'block' : 'none';
+}
+
+function sendWhatsAppOrder() {
+  let orderText = 'Hello Twinz Atchar & Empire, I would like to place this order:\n\n';
+  cart.forEach(item => {
+    orderText += `• ${item.name} x${item.qty} = R${item.subtotal.toLocaleString()}\n`;
+  });
+  orderText += `\nTOTAL: R${total.toLocaleString()}\n\n`;
+  orderText += 'Shop Name: \nContact Person: \nDelivery Address: \nPhone: \nPayment Method: Cash/EFT\nThank you!';
+  
+  let phone = '27682547352';
+  let url = `https://wa.me/${phone}?text=${encodeURIComponent(orderText)}`;
+  window.open(url, '_blank');
+}
+
+function openPaymentModal() {
+  document.getElementById('paymentModal').style.display = 'block';
+}
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').style.display = 'none';
+}
+
+function sendPOPWhatsApp() {
+  let msg = 'Hello, please find attached Proof of Payment for Twinz Atchar order.\n\nShop Name: \nAmount: R' + total.toLocaleString() + '\nDate: ' + new Date().toLocaleDateString();
+  window.open(`https://wa.me/27682547352?text=${encodeURIComponent(msg)}`, '_blank');
+  closePaymentModal();
+}
+
+function openDeliveryTracker() {
+  document.getElementById('deliveryModal').style.display = 'block';
+  updateStatusDisplay();
+}
+
+function closeDeliveryModal() {
+  document.getElementById('deliveryModal').style.display = 'none';
+}
+
+function updateStatus() {
+  if(deliveryStep < 4) {
+    deliveryStep++;
+    document.getElementById('step' + deliveryStep).classList.add('active');
+    if(deliveryStep > 2) {
+      document.getElementById('step' + (deliveryStep-1)).classList.remove('active');
+      document.getElementById('step' + (deliveryStep-1)).classList.add('completed');
+    }
+    updateStatusDisplay();
+  }
+}
+
+function updateStatusDisplay() {
+  const statuses = ['Order Received', 'Preparing your order', 'On the Road - Driver coming', 'Delivered - Thank you!'];
+  const times = ['Order received', '2-4 hours', 'Today 14:00-16:00', 'Delivered'];
+  document.getElementById('currentStatus').innerText = statuses[deliveryStep-1];
+  document.getElementById('estDelivery').innerText = times[deliveryStep-1];
+}
+
+function toggleSpecial() {
+  specialActive = !specialActive;
+  document.getElementById('specialBanner').classList.toggle('show', specialActive);
+}
+
+function toggleStock(cardId) {
+  let card = document.getElementById(cardId);
+  let btn = card.querySelector('.btn');
+  card.classList.toggle('oos');
+  btn.disabled = card.classList.contains('oos');
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  if(event.target.classList.contains('modal')) {
+    event.target.style.display = 'none';
+  }
+}
+
+if(window.location.search.includes('client=true')) {
+  document.querySelector('.admin-panel').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
