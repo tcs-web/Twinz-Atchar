@@ -56,18 +56,21 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 .toggle-btn{background:#6b7280;color:white;border:none;padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer;margin-left:5px}
 .copy-box{display:flex;gap:5px;margin-top:8px}
 .copy-box input{flex:1;padding:6px;border:1px solid #ccc;border-radius:4px;font-size:11px}
-.hidden-client{display:none}
+.client-refresh{position:fixed;top:70px;right:10px;z-index:999;background:var(--blue);color:white;border:none;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:bold;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.admin-only{display:block}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+
+<!-- REFRESH BUTTON - CLIENT MODE ONLY -->
+<button class="client-refresh" id="refreshBtn" onclick="refreshStock()" style="display:none">🔄 Refresh Stock</button>
 
 <div class="special-banner" id="specialBanner">
 🎉 JUNE SPECIAL: Buy 2 Supermarket Packs, Get 1 Case Mango Atchar FREE!
 </div>
 
 <div class="header">
-  <!-- REPLACE THIS LOGO URL WITH YOUR TWINZ LOGO -->
   <img src="https://i.imgur.com/PLACEHOLDER_LOGO.png" alt="Twinz Logo" class="logo">
   <h1>TWINZ ATCHAR & EMPIRE</h1>
   <p>Wholesale Supplier | Burgersfort | Affordable Packages</p>
@@ -79,7 +82,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 <div class="container">
 
 <!-- ADMIN PANEL - HIDDEN IN CLIENT MODE -->
-<div class="admin-panel" id="adminPanel">
+<div class="admin-panel admin-only" id="adminPanel">
   <h4>⚙️ Admin Controls - Only You See This</h4>
   <button class="btn-secondary" onclick="toggleSpecial()">Toggle Monthly Special</button>
   <button class="btn-blue" onclick="openDeliveryTracker()">Update Delivery Status</button>
@@ -88,13 +91,14 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
     <input type="text" id="clientLink" readonly>
     <button class="btn-whatsapp" onclick="shareWhatsApp()">Share</button>
   </div>
+  <small style="display:block;margin-top:5px;color:var(--muted)">Changes sync to client link. Tell client to tap 🔄 Refresh Stock</small>
 </div>
 
 <div class="section-title">🏪 Shop Starter Packs - Affordable</div>
 <div class="grid">
 
-<div class="card" id="cardA">
-  <button class="toggle-btn" onclick="toggleStock('cardA')">OOS</button>
+<div class="card" id="cardA" data-id="cardA">
+  <button class="toggle-btn admin-only" onclick="toggleStock('cardA')">OOS</button>
   <img src="https://i.imgur.com/PLACEHOLDER_PACKA.jpg" alt="Shop Starter Pack A">
   <h3>Shop Starter Pack A - R450</h3>
   <p><b>Perfect for spaza shops</b><br>12x 380g Mango Atchar<br>12x 380g Chakalaka Atchar<br>6x 1L Empire Hot Sauce</p>
@@ -103,8 +107,8 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
   <button class="btn" id="btnA" onclick="addToCart('Shop Starter Pack A', 450, 'packA')">Add to Order</button>
 </div>
 
-<div class="card" id="cardB">
-  <button class="toggle-btn" onclick="toggleStock('cardB')">OOS</button>
+<div class="card" id="cardB" data-id="cardB">
+  <button class="toggle-btn admin-only" onclick="toggleStock('cardB')">OOS</button>
   <img src="https://i.imgur.com/PLACEHOLDER_PACKB.jpg" alt="Shop Starter Pack B">
   <h3>Shop Starter Pack B - R680</h3>
   <p><b>Bigger shops</b><br>24x 380g Mixed Atchar<br>12x 1L Empire Sauce<br>24x 250g Chilli Atchar</p>
@@ -118,8 +122,8 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 <div class="section-title">🛒 Supermarket Bulk Packs</div>
 <div class="grid">
 
-<div class="card" id="cardS1">
-  <button class="toggle-btn" onclick="toggleStock('cardS1')">OOS</button>
+<div class="card" id="cardS1" data-id="cardS1">
+  <button class="toggle-btn admin-only" onclick="toggleStock('cardS1')">OOS</button>
   <img src="https://i.imgur.com/PLACEHOLDER_SUPER1.jpg" alt="Supermarket Pack 1">
   <h3>Supermarket Pack 1 - R1,250</h3>
   <p>48x 380g Mango Atchar<br>48x 380g Chakalaka Atchar<br>24x 1L Empire Sauce</p>
@@ -128,8 +132,8 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
   <button class="btn" id="btnS1" onclick="addToCart('Supermarket Pack 1', 1250, 'super1')">Add to Order</button>
 </div>
 
-<div class="card" id="cardS2">
-  <button class="toggle-btn" onclick="toggleStock('cardS2')">OOS</button>
+<div class="card" id="cardS2" data-id="cardS2">
+  <button class="toggle-btn admin-only" onclick="toggleStock('cardS2')">OOS</button>
   <img src="https://i.imgur.com/PLACEHOLDER_SUPER2.jpg" alt="Supermarket Pack 2">
   <h3>Supermarket Pack 2 - R2,100</h3>
   <p>96x 380g Mixed Atchar<br>48x 1L Empire Sauce<br>48x 250g Chilli Atchar</p>
@@ -143,8 +147,8 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 <div class="section-title">📦 Single Items</div>
 <div class="grid">
 
-<div class="card" id="cardMango">
-  <button class="toggle-btn" onclick="toggleStock('cardMango')">OOS</button>
+<div class="card" id="cardMango" data-id="cardMango">
+  <button class="toggle-btn admin-only" onclick="toggleStock('cardMango')">OOS</button>
   <img src="https://i.imgur.com/PLACEHOLDER_MANGO.jpg" alt="Mango Atchar">
   <h3>Mango Atchar 380g</h3>
   <p>12 units/case | R32 each wholesale<br>Retail: R45-R50 | Profit: R13-R18</p>
@@ -153,8 +157,8 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
   <button class="btn" id="btnMango" onclick="addToCart('Mango Atchar 380g x12', 384, 'mango')">Add</button>
 </div>
 
-<div class="card" id="cardEmpire">
-  <button class="toggle-btn" onclick="toggleStock('cardEmpire')">OOS</button>
+<div class="card" id="cardEmpire" data-id="cardEmpire">
+  <button class="toggle-btn admin-only" onclick="toggleStock('cardEmpire')">OOS</button>
   <img src="https://i.imgur.com/PLACEHOLDER_EMPIRE.jpg" alt="Empire Sauce">
   <h3>Empire Sauce 1L</h3>
   <p>12 units/case | R48 each wholesale<br>Retail: R65-R70 | Profit: R17-R22</p>
@@ -163,8 +167,8 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
   <button class="btn" id="btnEmpire" onclick="addToCart('Empire Sauce 1L x12', 576, 'empire')">Add</button>
 </div>
 
-<div class="card" id="cardChilli">
-  <button class="toggle-btn" onclick="toggleStock('cardChilli')">OOS</button>
+<div class="card" id="cardChilli" data-id="cardChilli">
+  <button class="toggle-btn admin-only" onclick="toggleStock('cardChilli')">OOS</button>
   <img src="https://i.imgur.com/PLACEHOLDER_CHILLI.jpg" alt="Chilli Atchar">
   <h3>Chilli Atchar 250g</h3>
   <p>24 units/case | R22 each wholesale<br>Retail: R32-R35 | Profit: R10-R13</p>
@@ -230,10 +234,49 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 <script>
 let cart = [];
-let specialActive = false;
-let deliveryStep = 2;
 let invoiceNo = 'TWZ-INV-' + Date.now().toString().slice(-6);
 let isClientMode = window.location.search.includes('client=true');
+
+// Load saved state from localStorage
+function loadState() {
+  // Load special banner
+  let specialSaved = localStorage.getItem('twinz_special');
+  if(specialSaved === 'true') {
+    document.getElementById('specialBanner').classList.add('show');
+  } else {
+    document.getElementById('specialBanner').classList.remove('show');
+  }
+
+  // Load OOS status for all cards
+  document.querySelectorAll('.card[data-id]').forEach(card => {
+    let id = card.dataset.id;
+    let oos = localStorage.getItem('twinz_oos_' + id);
+    if(oos === 'true') {
+      card.classList.add('oos');
+      let btn = card.querySelector('.btn');
+      if(btn) btn.disabled = true;
+    } else {
+      card.classList.remove('oos');
+      let btn = card.querySelector('.btn');
+      if(btn) btn.disabled = false;
+    }
+  });
+}
+
+// Save state to localStorage
+function saveSpecial(state) {
+  localStorage.setItem('twinz_special', state);
+}
+
+function saveOOS(id, state) {
+  localStorage.setItem('twinz_oos_' + id, state);
+}
+
+// CLIENT REFRESH FUNCTION
+function refreshStock() {
+  loadState();
+  alert('Stock updated! Latest availability loaded.');
+}
 
 function addToCart(name, price, qtyId) {
   let qty = parseInt(document.getElementById(qtyId).value);
@@ -315,16 +358,21 @@ function sendPOPWhatsApp() {
   closePaymentModal();
 }
 
+// SYNCED FUNCTIONS - ADMIN ONLY
 function toggleSpecial() {
-  specialActive =!specialActive;
-  document.getElementById('specialBanner').classList.toggle('show', specialActive);
+  let banner = document.getElementById('specialBanner');
+  banner.classList.toggle('show');
+  let state = banner.classList.contains('show');
+  saveSpecial(state);
 }
 
 function toggleStock(cardId) {
   let card = document.getElementById(cardId);
   let btn = card.querySelector('.btn');
   card.classList.toggle('oos');
-  btn.disabled = card.classList.contains('oos');
+  let isOOS = card.classList.contains('oos');
+  btn.disabled = isOOS;
+  saveOOS(cardId, isOOS);
 }
 
 function copyClientLink() {
@@ -334,12 +382,12 @@ function copyClientLink() {
   document.getElementById('copyBox').style.display = 'flex';
   document.getElementById('clientLink').select();
   document.execCommand('copy');
-  alert('Client link copied!');
+  alert('Client link copied! Tell client to use 🔄 Refresh Stock button for updates.');
 }
 
 function shareWhatsApp() {
   let clientUrl = document.getElementById('clientLink').value;
-  window.open(`https://wa.me/?text=${encodeURIComponent('Order Twinz Atchar here: ' + clientUrl)}`, '_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent('Order Twinz Atchar here: ' + clientUrl + '\n\nTap 🔄 Refresh Stock button for latest availability')}`, '_blank');
 }
 
 function generateInvoicePDF() {
@@ -362,11 +410,19 @@ window.onclick = function(event) {
   }
 }
 
-// Hide admin panel + invoice generator in client mode
+// INIT - Hide admin + invoice in client mode, show refresh button, load synced state
 if(isClientMode) {
-  document.getElementById('adminPanel').style.display = 'none';
   document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+  document.getElementById('refreshBtn').style.display = 'block';
 }
+loadState();
+
+// Listen for changes from other tabs - auto refresh OOS + Special
+window.addEventListener('storage', function(e) {
+  if(e.key === 'twinz_special' || e.key.startsWith('twinz_oos_')) {
+    loadState();
+  }
+});
 </script>
 
 </body>
