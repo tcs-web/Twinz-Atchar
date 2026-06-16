@@ -56,15 +56,14 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 .toggle-btn{background:#6b7280;color:white;border:none;padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer;margin-left:5px}
 .copy-box{display:flex;gap:5px;margin-top:8px}
 .copy-box input{flex:1;padding:6px;border:1px solid #ccc;border-radius:4px;font-size:11px}
-.client-refresh{position:fixed;top:70px;right:10px;z-index:999;background:var(--blue);color:white;border:none;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:bold;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.sync-status{position:fixed;top:70px;right:10px;z-index:999;background:var(--green);color:white;padding:6px 10px;border-radius:20px;font-size:10px;font-weight:bold}
 .admin-only{display:block}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- REFRESH BUTTON - CLIENT MODE ONLY -->
-<button class="client-refresh" id="refreshBtn" onclick="refreshStock()" style="display:none">🔄 Refresh Stock</button>
+<div class="sync-status" id="syncStatus">🟡 Connecting...</div>
 
 <div class="special-banner" id="specialBanner">
 🎉 JUNE SPECIAL: Buy 2 Supermarket Packs, Get 1 Case Mango Atchar FREE!
@@ -83,7 +82,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 <!-- ADMIN PANEL - HIDDEN IN CLIENT MODE -->
 <div class="admin-panel admin-only" id="adminPanel">
-  <h4>⚙️ Admin Controls - Only You See This</h4>
+  <h4>⚙️ Admin Controls - Live Sync to All Clients</h4>
   <button class="btn-secondary" onclick="toggleSpecial()">Toggle Monthly Special</button>
   <button class="btn-blue" onclick="openDeliveryTracker()">Update Delivery Status</button>
   <button class="btn-green" onclick="copyClientLink()">📤 Send Client Link</button>
@@ -91,7 +90,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
     <input type="text" id="clientLink" readonly>
     <button class="btn-whatsapp" onclick="shareWhatsApp()">Share</button>
   </div>
-  <small style="display:block;margin-top:5px;color:var(--muted)">Changes sync to client link. Tell client to tap 🔄 Refresh Stock</small>
+  <small style="display:block;margin-top:5px;color:var(--muted)">Changes sync instantly to all client phones</small>
 </div>
 
 <div class="section-title">🏪 Shop Starter Packs - Affordable</div>
@@ -232,26 +231,45 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
   </div>
 </div>
 
-<script>
+<!-- Firebase SDK + Live Sync -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+// YOUR FIREBASE CONFIG - CONNECTED ✅
+const firebaseConfig = {
+  apiKey: "AIzaSyAE-2ZlY3dPKKWNNQIYt6SG846BboS5-VI",
+  authDomain: "twinz-catalog.firebaseapp.com",
+  databaseURL: "https://twinz-catalog-default-rtdb.firebaseio.com",
+  projectId: "twinz-catalog",
+  storageBucket: "twinz-catalog.firebasestorage.app",
+  messagingSenderId: "472687488237",
+  appId: "1:472687488237:web:bc0164733c283da59a30e4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 let cart = [];
 let invoiceNo = 'TWZ-INV-' + Date.now().toString().slice(-6);
 let isClientMode = window.location.search.includes('client=true');
 
-// Load saved state from localStorage
-function loadState() {
-  // Load special banner
-  let specialSaved = localStorage.getItem('twinz_special');
-  if(specialSaved === 'true') {
-    document.getElementById('specialBanner').classList.add('show');
-  } else {
-    document.getElementById('specialBanner').classList.remove('show');
-  }
+// LISTEN FOR REALTIME CHANGES FROM FIREBASE
+const specialRef = ref(db, 'catalog/special');
+const stockRef = ref(db, 'catalog/stock');
 
-  // Load OOS status for all cards
+onValue(specialRef, (snapshot) => {
+  let isActive = snapshot.val();
+  document.getElementById('specialBanner').classList.toggle('show', isActive);
+  document.getElementById('syncStatus').innerText = '🟢 Live Sync';
+});
+
+onValue(stockRef, (snapshot) => {
+  let stock = snapshot.val() || {};
   document.querySelectorAll('.card[data-id]').forEach(card => {
     let id = card.dataset.id;
-    let oos = localStorage.getItem('twinz_oos_' + id);
-    if(oos === 'true') {
+    let isOOS = stock[id];
+    if(isOOS) {
       card.classList.add('oos');
       let btn = card.querySelector('.btn');
       if(btn) btn.disabled = true;
@@ -261,24 +279,39 @@ function loadState() {
       if(btn) btn.disabled = false;
     }
   });
+  document.getElementById('syncStatus').innerText = '🟢 Synced ' + new Date().toLocaleTimeString();
+});
+
+// SYNCED FUNCTIONS - ADMIN ONLY
+window.toggleSpecial = function() {
+  let banner = document.getElementById('specialBanner');
+  let newState =!banner.classList.contains('show');
+  set(specialRef, newState);
 }
 
-// Save state to localStorage
-function saveSpecial(state) {
-  localStorage.setItem('twinz_special', state);
+window.toggleStock = function(cardId) {
+  let card = document.getElementById(cardId);
+  let isOOS = card.classList.contains('oos');
+  set(ref(db, 'catalog/stock/' + cardId),!isOOS);
 }
 
-function saveOOS(id, state) {
-  localStorage.setItem('twinz_oos_' + id, state);
+window.copyClientLink = function() {
+  let baseUrl = window.location.href.split('?')[0];
+  let clientUrl = baseUrl + '?client=true';
+  document.getElementById('clientLink').value = clientUrl;
+  document.getElementById('copyBox').style.display = 'flex';
+  document.getElementById('clientLink').select();
+  document.execCommand('copy');
+  alert('Client link copied! Stock syncs live to all phones.');
 }
 
-// CLIENT REFRESH FUNCTION
-function refreshStock() {
-  loadState();
-  alert('Stock updated! Latest availability loaded.');
+window.shareWhatsApp = function() {
+  let clientUrl = document.getElementById('clientLink').value;
+  window.open(`https://wa.me/?text=${encodeURIComponent('Order Twinz Atchar here: ' + clientUrl + '\n\nStock updates live automatically')}`, '_blank');
 }
 
-function addToCart(name, price, qtyId) {
+// CART FUNCTIONS
+window.addToCart = function(name, price, qtyId) {
   let qty = parseInt(document.getElementById(qtyId).value);
   if(qty <= 0) { alert('Enter quantity first'); return; }
 
@@ -319,19 +352,19 @@ function updateCart() {
   document.getElementById('cartList').innerHTML = listHTML;
 }
 
-function removeItem(index) {
+window.removeItem = function(index) {
   cart.splice(index, 1);
   updateCart();
 }
 
-function clearCart() {
+window.clearCart = function() {
   if(confirm('Cancel entire order? All items will be removed.')) {
     cart = [];
     updateCart();
   }
 }
 
-function sendWhatsAppOrder() {
+window.sendWhatsAppOrder = function() {
   if(cart.length === 0) return;
   let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
   let orderText = 'Hello Twinz Atchar & Empire, new order:\n\n';
@@ -342,55 +375,23 @@ function sendWhatsAppOrder() {
   window.open(`https://wa.me/27682547352?text=${encodeURIComponent(orderText)}`, '_blank');
 }
 
-function openPaymentModal() {
+window.openPaymentModal = function() {
   if(cart.length === 0) { alert('Add items to cart first'); return; }
   document.getElementById('paymentModal').style.display = 'block';
 }
 
-function closePaymentModal() {
+window.closePaymentModal = function() {
   document.getElementById('paymentModal').style.display = 'none';
 }
 
-function sendPOPWhatsApp() {
+window.sendPOPWhatsApp = function() {
   let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
   let msg = 'POP attached for Twinz order.\nAmount: R' + total.toLocaleString();
   window.open(`https://wa.me/27682547352?text=${encodeURIComponent(msg)}`, '_blank');
   closePaymentModal();
 }
 
-// SYNCED FUNCTIONS - ADMIN ONLY
-function toggleSpecial() {
-  let banner = document.getElementById('specialBanner');
-  banner.classList.toggle('show');
-  let state = banner.classList.contains('show');
-  saveSpecial(state);
-}
-
-function toggleStock(cardId) {
-  let card = document.getElementById(cardId);
-  let btn = card.querySelector('.btn');
-  card.classList.toggle('oos');
-  let isOOS = card.classList.contains('oos');
-  btn.disabled = isOOS;
-  saveOOS(cardId, isOOS);
-}
-
-function copyClientLink() {
-  let baseUrl = window.location.href.split('?')[0];
-  let clientUrl = baseUrl + '?client=true';
-  document.getElementById('clientLink').value = clientUrl;
-  document.getElementById('copyBox').style.display = 'flex';
-  document.getElementById('clientLink').select();
-  document.execCommand('copy');
-  alert('Client link copied! Tell client to use 🔄 Refresh Stock button for updates.');
-}
-
-function shareWhatsApp() {
-  let clientUrl = document.getElementById('clientLink').value;
-  window.open(`https://wa.me/?text=${encodeURIComponent('Order Twinz Atchar here: ' + clientUrl + '\n\nTap 🔄 Refresh Stock button for latest availability')}`, '_blank');
-}
-
-function generateInvoicePDF() {
+window.generateInvoicePDF = function() {
   if(cart.length === 0) { alert('Add items first'); return; }
   let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
   let win = window.open('', '_blank');
@@ -398,7 +399,7 @@ function generateInvoicePDF() {
   win.document.close();
 }
 
-function sendInvoiceWhatsApp() {
+window.sendInvoiceWhatsApp = function() {
   let clientName = document.getElementById('clientName').value || 'Customer';
   let msg = `Hello ${clientName}, your Twinz invoice is ready.\nAmount: R${cart.reduce((sum, item) => sum + item.subtotal, 0).toLocaleString()}`;
   window.open(`https://wa.me/27682547352?text=${encodeURIComponent(msg)}`, '_blank');
@@ -410,19 +411,10 @@ window.onclick = function(event) {
   }
 }
 
-// INIT - Hide admin + invoice in client mode, show refresh button, load synced state
+// INIT - Hide admin + invoice in client mode
 if(isClientMode) {
   document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-  document.getElementById('refreshBtn').style.display = 'block';
 }
-loadState();
-
-// Listen for changes from other tabs - auto refresh OOS + Special
-window.addEventListener('storage', function(e) {
-  if(e.key === 'twinz_special' || e.key.startsWith('twinz_oos_')) {
-    loadState();
-  }
-});
 </script>
 
 </body>
