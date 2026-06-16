@@ -7,7 +7,8 @@
 <style>
 :root{--bg:#fff9f0;--card:#ffffff;--accent:#d97706;--green:#16a34a;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed;--text:#1a1a1a;--muted:#6b7280}
 body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;padding-bottom:220px}
-.header{background:linear-gradient(135deg,#d97706,#b45309);color:white;padding:20px;text-align:center;position:relative}
+.header{background:linear-gradient(135deg,#d97706,#b45309);color:white;padding:15px;text-align:center;position:relative}
+.logo{width:80px;height:80px;border-radius:50%;background:white;padding:5px;margin:0 auto 10px;border:3px solid white;object-fit:cover}
 .header h1{margin:0;font-size:22px}
 .header p{margin:5px 0;font-size:12px}
 .special-banner{background:#fef3c7;color:#92400e;padding:10px;text-align:center;font-weight:bold;font-size:13px;border-bottom:3px solid var(--accent);display:none}
@@ -19,7 +20,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 .card{background:var(--card);border-radius:12px;padding:12px;margin:10px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1);position:relative}
 .card.oos{opacity:0.5}
 .card.oos::after{content:'OUT OF STOCK';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);background:var(--red);color:white;padding:8px 20px;font-weight:bold;border-radius:5px;font-size:14px;z-index:10}
-.card img{width:100%;height:180px;object-fit:cover;border-radius:8px;margin-bottom:8px}
+.card img{width:100%;height:180px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:2px solid #f3f4f6}
 .card h3{margin:5px 0;color:var(--accent);font-size:16px}
 .price{font-size:18px;font-weight:bold;color:var(--green)}
 .old-price{text-decoration:line-through;color:var(--muted);font-size:12px;margin-left:5px}
@@ -31,6 +32,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 .btn-blue{background:var(--blue)}
 .btn-red{background:var(--red);font-size:11px;padding:6px 10px}
 .btn-purple{background:var(--purple)}
+.btn-green{background:var(--green)}
 .section-title{font-size:18px;margin:20px 0 10px 0;color:var(--accent);border-left:4px solid var(--accent);padding-left:10px}
 .company{font-size:11px;color:var(--muted);text-align:center;margin:20px 0;line-height:1.6}
 .qty-input{width:60px;padding:5px;border:1px solid #ccc;border-radius:4px;text-align:center;margin:0 5px}
@@ -41,51 +43,50 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 .cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .cart-total{font-size:20px;font-weight:bold;color:var(--green);margin:10px 0}
 .cart-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px dashed #ddd;font-size:12px;background:#fafafa;border-radius:6px;margin-bottom:5px}
-.cart-item:last-child{border-bottom:none}
 
 /* Modal Styles */
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
 .modal-content{background:var(--card);margin:5% auto;padding:20px;border-radius:12px;width:90%;max-width:500px;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
-.modal-content h3{color:var(--accent);margin-top:0}
-.close{float:right;font-size:24px;font-weight:bold;cursor:pointer;color:var(--muted)}
-.close:hover{color:var(--text)}
+.close{float:right;font-size:24px;cursor:pointer}
 .bank-details{background:#f0f9ff;border:2px solid var(--blue);padding:15px;border-radius:8px;margin:15px 0}
-.bank-details p{margin:5px 0;font-size:13px}
-.status-tracker{display:flex;justify-content:space-between;margin:20px 0;position:relative}
-.status-step{flex:1;text-align:center;position:relative;z-index:2}
-.status-step.circle{width:40px;height:40px;border-radius:50%;background:#d1d5db;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto;font-weight:bold}
-.status-step.active.circle{background:var(--green)}
-.status-step.completed.circle{background:var(--accent)}
-.status-step p{font-size:10px;margin-top:5px}
-.status-line{position:absolute;top:20px;left:20%;right:20%;height:2px;background:#d1d5db;z-index:1}
-.admin-panel{background:#f3f4f6;padding:10px;border-radius:8px;margin:15px 0;border:1px dashed var(--accent)}
+.qr-box{text-align:center;margin:15px 0;padding:15px;background:#fff;border:2px dashed var(--accent);border-radius:8px}
+.qr-box img{width:180px;height:180px;margin:10px auto;display:block}
+.admin-panel{background:#f3f4f6;padding:10px;border-radius:8px;margin:15px 0;border:2px dashed var(--accent)}
 .admin-panel h4{margin:5px 0;font-size:13px}
 .toggle-btn{background:#6b7280;color:white;border:none;padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer;margin-left:5px}
+.copy-box{display:flex;gap:5px;margin-top:8px}
+.copy-box input{flex:1;padding:6px;border:1px solid #ccc;border-radius:4px;font-size:11px}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
 <div class="special-banner" id="specialBanner">
-🎉 JUNE SPECIAL: Buy 2 Supermarket Packs, Get 1 Case Mango Atchar FREE! Valid till 30 June 2026
+🎉 JUNE SPECIAL: Buy 2 Supermarket Packs, Get 1 Case Mango Atchar FREE!
 </div>
 
 <div class="header">
-  <h1>🥭 TWINZ ATCHAR & EMPIRE</h1>
+  <!-- REPLACE THIS LOGO URL WITH YOUR TWINZ LOGO -->
+  <img src="https://i.imgur.com/PLACEHOLDER_LOGO.png" alt="Twinz Logo" class="logo">
+  <h1>TWINZ ATCHAR & EMPIRE</h1>
   <p>Wholesale Supplier | Burgersfort | Affordable Packages</p>
   <span class="badge">Free Delivery 20km</span>
   <span class="badge">Bulk Discounts</span>
-  <span class="badge blue">EFT Accepted</span>
+  <span class="badge blue">EFT + QR Pay</span>
 </div>
 
 <div class="container">
 
 <!-- ADMIN PANEL -->
-<div class="admin-panel">
-  <h4>⚙️ Admin Controls</h4>
+<div class="admin-panel" id="adminPanel">
+  <h4>⚙️ Admin Controls - Only You See This</h4>
   <button class="btn-secondary" onclick="toggleSpecial()">Toggle Monthly Special</button>
   <button class="btn-blue" onclick="openDeliveryTracker()">Update Delivery Status</button>
-  <small style="margin-left:10px">Click each card's "OOS" button to mark Out of Stock</small>
+  <button class="btn-green" onclick="copyClientLink()">📤 Send Client Link</button>
+  <div class="copy-box" id="copyBox" style="display:none">
+    <input type="text" id="clientLink" readonly>
+    <button class="btn-whatsapp" onclick="shareWhatsApp()">Share</button>
+  </div>
 </div>
 
 <div class="section-title">🏪 Shop Starter Packs - Affordable</div>
@@ -93,7 +94,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 <div class="card" id="cardA">
   <button class="toggle-btn" onclick="toggleStock('cardA')">OOS</button>
-  <img src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=500" alt="Atchar Mix">
+  <img src="https://i.imgur.com/PLACEHOLDER_PACKA.jpg" alt="Shop Starter Pack A">
   <h3>Shop Starter Pack A - R450</h3>
   <p><b>Perfect for spaza shops</b><br>12x 380g Mango Atchar<br>12x 380g Chakalaka Atchar<br>6x 1L Empire Hot Sauce</p>
   <div><span class="price">R450</span> <span class="old-price">R540</span></div>
@@ -103,7 +104,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 <div class="card" id="cardB">
   <button class="toggle-btn" onclick="toggleStock('cardB')">OOS</button>
-  <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058c?w=500" alt="Empire Sauce">
+  <img src="https://i.imgur.com/PLACEHOLDER_PACKB.jpg" alt="Shop Starter Pack B">
   <h3>Shop Starter Pack B - R680</h3>
   <p><b>Bigger shops</b><br>24x 380g Mixed Atchar<br>12x 1L Empire Sauce<br>24x 250g Chilli Atchar</p>
   <div><span class="price">R680</span> <span class="old-price">R820</span></div>
@@ -118,7 +119,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 <div class="card" id="cardS1">
   <button class="toggle-btn" onclick="toggleStock('cardS1')">OOS</button>
-  <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500" alt="Bulk Atchar">
+  <img src="https://i.imgur.com/PLACEHOLDER_SUPER1.jpg" alt="Supermarket Pack 1">
   <h3>Supermarket Pack 1 - R1,250</h3>
   <p>48x 380g Mango Atchar<br>48x 380g Chakalaka Atchar<br>24x 1L Empire Sauce</p>
   <div><span class="price">R1,250</span> <span class="old-price">R1,520</span></div>
@@ -128,7 +129,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 <div class="card" id="cardS2">
   <button class="toggle-btn" onclick="toggleStock('cardS2')">OOS</button>
-  <img src="https://images.unsplash.com/photo-1547592180-85f173990888?w=500" alt="Empire Bulk">
+  <img src="https://i.imgur.com/PLACEHOLDER_SUPER2.jpg" alt="Supermarket Pack 2">
   <h3>Supermarket Pack 2 - R2,100</h3>
   <p>96x 380g Mixed Atchar<br>48x 1L Empire Sauce<br>48x 250g Chilli Atchar</p>
   <div><span class="price">R2,100</span> <span class="old-price">R2,580</span></div>
@@ -143,7 +144,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 <div class="card" id="cardMango">
   <button class="toggle-btn" onclick="toggleStock('cardMango')">OOS</button>
-  <img src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=500" alt="Mango Atchar">
+  <img src="https://i.imgur.com/PLACEHOLDER_MANGO.jpg" alt="Mango Atchar">
   <h3>Mango Atchar 380g</h3>
   <p>12 units/case | R32 each wholesale<br>Retail: R45-R50 | Profit: R13-R18</p>
   <div><span class="price">R384/case</span></div>
@@ -153,7 +154,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 <div class="card" id="cardEmpire">
   <button class="toggle-btn" onclick="toggleStock('cardEmpire')">OOS</button>
-  <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058c?w=500" alt="Empire Sauce">
+  <img src="https://i.imgur.com/PLACEHOLDER_EMPIRE.jpg" alt="Empire Sauce">
   <h3>Empire Sauce 1L</h3>
   <p>12 units/case | R48 each wholesale<br>Retail: R65-R70 | Profit: R17-R22</p>
   <div><span class="price">R576/case</span></div>
@@ -163,7 +164,7 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 <div class="card" id="cardChilli">
   <button class="toggle-btn" onclick="toggleStock('cardChilli')">OOS</button>
-  <img src="https://images.unsplash.com/photo-1547592180-85f173990888?w=500" alt="Chilli Atchar">
+  <img src="https://i.imgur.com/PLACEHOLDER_CHILLI.jpg" alt="Chilli Atchar">
   <h3>Chilli Atchar 250g</h3>
   <p>24 units/case | R22 each wholesale<br>Retail: R32-R35 | Profit: R10-R13</p>
   <div><span class="price">R528/case</span></div>
@@ -193,52 +194,35 @@ input[type="text"]{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;bor
 
 </div>
 
-<!-- FIXED CART WITH ITEM LIST + CANCEL -->
+<!-- CART WITH CANCEL + QR -->
 <div class="cart" id="cartBox" style="display:none">
   <div class="cart-header">
     <div><b>Your Order:</b> <span id="cartItems">0 items</span></div>
     <button class="btn-red" onclick="clearCart()">🗑️ Cancel Order</button>
   </div>
-
   <div id="cartList"></div>
-
   <div class="cart-total">Total: R<span id="cartTotal">0</span></div>
   <button class="btn btn-whatsapp" onclick="sendWhatsAppOrder()">📱 Send Order via WhatsApp</button>
-  <button class="btn btn-blue" onclick="openPaymentModal()">💳 View EFT Details</button>
+  <button class="btn btn-blue" onclick="openPaymentModal()">💳 Pay with QR/EFT</button>
 </div>
 
-<!-- EFT Payment Modal -->
+<!-- EFT + QR Payment Modal -->
 <div id="paymentModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closePaymentModal()">&times;</span>
-    <h3>💳 EFT Payment Details</h3>
+    <h3>💳 Pay with QR Code - Standard Bank</h3>
+    <div class="qr-box">
+      <p><b>Scan to Pay Twinz Cooperate Services</b></p>
+      <img id="qrCode" src="" alt="QR Code">
+      <p><b>Amount: R<span id="qrAmount">0</span></b></p>
+    </div>
     <div class="bank-details">
       <p><b>Bank:</b> Standard Bank</p>
       <p><b>Account Name:</b> TWINZ COOPERATE SERVICES PTY LTD</p>
       <p><b>Account Number:</b> 10 26 459 443 4</p>
       <p><b>Branch Code:</b> 006145</p>
-      <p><b>Reference:</b> Use Shop Name + Invoice No</p>
     </div>
     <button class="btn btn-whatsapp" onclick="sendPOPWhatsApp()">📱 Send POP via WhatsApp</button>
-  </div>
-</div>
-
-<!-- Delivery Tracker Modal -->
-<div id="deliveryModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeDeliveryModal()">&times;</span>
-    <h3>🚚 Delivery Status Tracker</h3>
-    <p style="font-size:12px">Order #: <span id="orderNum">TWZ-ORD-001</span></p>
-    <div class="status-tracker">
-      <div class="status-line"></div>
-      <div class="status-step completed" id="step1"><div class="circle">1</div><p>Order Received</p></div>
-      <div class="status-step active" id="step2"><div class="circle">2</div><p>Preparing</p></div>
-      <div class="status-step" id="step3"><div class="circle">3</div><p>On the Road</p></div>
-      <div class="status-step" id="step4"><div class="circle">4</div><p>Delivered</p></div>
-    </div>
-    <p><b>Status:</b> <span id="currentStatus">Preparing your order</span></p>
-    <p><b>ETA:</b> <span id="estDelivery">Today 14:00-16:00</span></p>
-    <button class="btn btn-secondary" onclick="updateStatus()">Update Status</button>
   </div>
 </div>
 
@@ -271,9 +255,11 @@ function updateCart() {
 
   document.getElementById('cartItems').innerText = itemCount + ' items';
   document.getElementById('cartTotal').innerText = total.toLocaleString();
+  document.getElementById('qrAmount').innerText = total.toLocaleString();
   document.getElementById('cartBox').style.display = cart.length > 0? 'block' : 'none';
 
-  // Show item list with remove button
+  document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=Beneficiary:TWINZ%20COOPERATE%20SERVICES%20PTY%20LTD%0AAccount:10264594434%0ABranch:006145%0AAmount:${total}`;
+
   let listHTML = cart.map((item, index) => `
     <div class="cart-item">
       <div style="flex:1">
@@ -300,19 +286,18 @@ function clearCart() {
 }
 
 function sendWhatsAppOrder() {
-  if(cart.length === 0) { alert('Cart is empty'); return; }
-
+  if(cart.length === 0) return;
   let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  let orderText = 'Hello Twinz Atchar & Empire, I would like to place this order:\n\n';
+  let orderText = 'Hello Twinz Atchar & Empire, new order:\n\n';
   cart.forEach(item => {
-    orderText += `• ${item.name}\n Qty: ${item.qty} | Subtotal: R${item.subtotal.toLocaleString()}\n\n`;
+    orderText += `• ${item.name}\n Qty: ${item.qty} | R${item.subtotal.toLocaleString()}\n\n`;
   });
-  orderText += `TOTAL: R${total.toLocaleString()}\n\nShop Name: \nContact: \nAddress: \nPhone: \nThank you!`;
-
+  orderText += `TOTAL: R${total.toLocaleString()}\n\nShop Name: \nAddress: \nPhone: `;
   window.open(`https://wa.me/27682547352?text=${encodeURIComponent(orderText)}`, '_blank');
 }
 
 function openPaymentModal() {
+  if(cart.length === 0) { alert('Add items to cart first'); return; }
   document.getElementById('paymentModal').style.display = 'block';
 }
 
@@ -322,37 +307,9 @@ function closePaymentModal() {
 
 function sendPOPWhatsApp() {
   let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  let msg = 'Proof of Payment attached for Twinz order.\nAmount: R' + total.toLocaleString() + '\nDate: ' + new Date().toLocaleDateString();
+  let msg = 'POP attached for Twinz order.\nAmount: R' + total.toLocaleString();
   window.open(`https://wa.me/27682547352?text=${encodeURIComponent(msg)}`, '_blank');
   closePaymentModal();
-}
-
-function openDeliveryTracker() {
-  document.getElementById('deliveryModal').style.display = 'block';
-  updateStatusDisplay();
-}
-
-function closeDeliveryModal() {
-  document.getElementById('deliveryModal').style.display = 'none';
-}
-
-function updateStatus() {
-  if(deliveryStep < 4) {
-    deliveryStep++;
-    document.getElementById('step' + deliveryStep).classList.add('active');
-    if(deliveryStep > 2) {
-      document.getElementById('step' + (deliveryStep-1)).classList.remove('active');
-      document.getElementById('step' + (deliveryStep-1)).classList.add('completed');
-    }
-    updateStatusDisplay();
-  }
-}
-
-function updateStatusDisplay() {
-  const statuses = ['Order Received', 'Preparing your order', 'On the Road', 'Delivered'];
-  const times = ['Received', '2-4 hours', 'Today 14:00-16:00', 'Delivered'];
-  document.getElementById('currentStatus').innerText = statuses[deliveryStep-1];
-  document.getElementById('estDelivery').innerText = times[deliveryStep-1];
 }
 
 function toggleSpecial() {
@@ -367,51 +324,32 @@ function toggleStock(cardId) {
   btn.disabled = card.classList.contains('oos');
 }
 
+function copyClientLink() {
+  let baseUrl = window.location.href.split('?')[0];
+  let clientUrl = baseUrl + '?client=true';
+  document.getElementById('clientLink').value = clientUrl;
+  document.getElementById('copyBox').style.display = 'flex';
+  document.getElementById('clientLink').select();
+  document.execCommand('copy');
+  alert('Client link copied!');
+}
+
+function shareWhatsApp() {
+  let clientUrl = document.getElementById('clientLink').value;
+  window.open(`https://wa.me/?text=${encodeURIComponent('Order Twinz Atchar here: ' + clientUrl)}`, '_blank');
+}
+
 function generateInvoicePDF() {
-  if(cart.length === 0) { alert('Add items to cart first'); return; }
-
-  let clientName = document.getElementById('clientName').value || 'Customer';
-  let clientPhone = document.getElementById('clientPhone').value || '---';
-  let clientAddress = document.getElementById('clientAddress').value || '---';
+  if(cart.length === 0) { alert('Add items first'); return; }
   let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  let vat = Math.round(total * 0.15);
-  let subtotal = total - vat;
-
-  let itemsHTML = cart.map(item => `
-    <tr><td>${item.name}</td><td>${item.qty}</td><td>R${item.price.toLocaleString()}</td><td>R${item.subtotal.toLocaleString()}</td></tr>
-  `).join('');
-
-  let invoiceHTML = `
-    <html><head><title>Invoice ${invoiceNo}</title>
-    <style>body{font-family:Arial;font-size:12px;padding:20px}.header{background:#d97706;color:white;padding:15px;text-align:center}
-    table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#d97706;color:white;padding:10px;text-align:left}
-    td{border:1px solid #ddd;padding:8px}.total-row{background:#fef3c7;font-weight:bold}.bank{margin-top:20px;padding:15px;background:#f0f9ff;border:2px solid #2563eb}</style>
-    </head><body>
-    <div class="header"><h2>TWINZ COOPERATE SERVICES PTY LTD</h2><p>INVOICE</p></div>
-    <p><b>From:</b> Twinz Cooperate Services | Reg: 2024/444303/07 | VAT: 9819040198<br>
-    Burgersfort | Tel: 068 254 7352 | Email: twinz.cooperate.services@gmail.com</p>
-    <p><b>To:</b> ${clientName}<br>${clientAddress}<br>Tel: ${clientPhone}<br>
-    <b>Invoice No:</b> ${invoiceNo}<br><b>Date:</b> ${new Date().toLocaleDateString()}</p>
-    <table><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
-    ${itemsHTML}
-    <tr class="total-row"><td colspan="3">Subtotal (Excl VAT 15%)</td><td>R${subtotal.toLocaleString()}</td></tr>
-    <tr class="total-row"><td colspan="3">VAT 15%</td><td>R${vat.toLocaleString()}</td></tr>
-    <tr class="total-row"><td colspan="3">TOTAL AMOUNT DUE</td><td>R${total.toLocaleString()}</td></tr></table>
-    <div class="bank"><b>Banking Details:</b><br>Standard Bank<br>Account: TWINZ COOPERATE SERVICES PTY LTD<br>
-    Account No: 10 26 459 443 4<br>Branch: 006145<br>Reference: ${clientName} ${invoiceNo}</div>
-    <p style="margin-top:20px;font-size:10px">Terms: Payment due within 7 days. Thank you!</p>
-    </body></html>
-  `;
-
   let win = window.open('', '_blank');
-  win.document.write(invoiceHTML);
+  win.document.write(`<h2>Twinz Invoice - Total R${total.toLocaleString()}</h2><p>Bank: Standard Bank 10 26 459 443 4 Branch: 006145</p><button onclick="window.print()">Print/Save PDF</button>`);
   win.document.close();
-  win.print();
 }
 
 function sendInvoiceWhatsApp() {
   let clientName = document.getElementById('clientName').value || 'Customer';
-  let msg = `Hello ${clientName}, your Twinz invoice is ready.\nInvoice No: ${invoiceNo}\nAmount: R${cart.reduce((sum, item) => sum + item.subtotal, 0).toLocaleString()}\nClick "Generate Invoice PDF" above to save and send.`;
+  let msg = `Hello ${clientName}, your Twinz invoice is ready.\nAmount: R${cart.reduce((sum, item) => sum + item.subtotal, 0).toLocaleString()}`;
   window.open(`https://wa.me/27682547352?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -422,7 +360,7 @@ window.onclick = function(event) {
 }
 
 if(window.location.search.includes('client=true')) {
-  document.querySelector('.admin-panel').style.display = 'none';
+  document.getElementById('adminPanel').style.display = 'none';
 }
 </script>
 
