@@ -237,9 +237,9 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-// YOUR FIREBASE CONFIG
+// 1. REPLACE THIS KEY ASAP in Google Cloud Console
 const firebaseConfig = {
-  apiKey: "AIzaSyAE-2ZlY3dPKKWNNQIYt6SG846BboS5-VI",
+  apiKey: "PASTE_NEW_KEY_HERE",
   authDomain: "twinz-catalog.firebaseapp.com",
   databaseURL: "https://twinz-catalog-default-rtdb.firebaseio.com",
   projectId: "twinz-catalog",
@@ -253,11 +253,109 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 let cart = [];
-let invoiceNo = 'TWZ-INV-' + Date.now().toString().slice(-6);
-let isClientMode = window.location.search.includes('client=true');
 let isAdmin = false;
 
-// 1. ADD LOGIN BOX TO ADMIN PANEL
+// 2. CART FUNCTIONS
+window.addToCart = function(name, price, qtyId) {
+  let qty = parseInt(document.getElementById(qtyId).value);
+  if(qty <= 0) { alert('Enter quantity first'); return; }
+
+  let existing = cart.find(item => item.name === name);
+  if(existing) {
+    existing.qty += qty;
+  } else {
+    cart.push({name, price, qty});
+  }
+
+  renderCart();
+  document.getElementById(qtyId).value = 0;
+} // <-- THIS BRACE WAS MISSING
+
+function renderCart() {
+  let total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  let itemCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
+  document.getElementById('cartItems').innerText = itemCount + ' items';
+  document.getElementById('cartTotal').innerText = total.toLocaleString();
+  document.getElementById('qrAmount').innerText = total.toLocaleString();
+  document.getElementById('cartBox').style.display = cart.length > 0? 'block' : 'none';
+
+  let listHTML = cart.map((item, index) => `
+    <div class="cart-item">
+      <div style="flex:1">
+        <b>${item.name}</b><br>
+        <small>${item.qty} x R${item.price.toLocaleString()} = R${(item.qty * item.price).toLocaleString()}</small>
+      </div>
+      <button class="btn-red" onclick="removeItem(${index})">Remove</button>
+    </div>
+  `).join('');
+
+  document.getElementById('cartList').innerHTML = listHTML;
+  document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=Amount:${total}`;
+}
+
+window.removeItem = function(index) {
+  cart.splice(index, 1);
+  renderCart();
+}
+
+window.clearCart = function() {
+  if(confirm('Cancel entire order?')) {
+    cart = [];
+    renderCart();
+  }
+}
+
+// 3. PAYMENT MODAL
+window.openPaymentModal = function() {
+  if(cart.length === 0) { alert('Add items to cart first'); return; }
+  document.getElementById('paymentModal').style.display = 'block';
+}
+window.closePaymentModal = function() {
+  document.getElementById('paymentModal').style.display = 'none';
+}
+window.sendPOPWhatsApp = function() {
+  let total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  window.open(`https://wa.me/27682547352?text=${encodeURIComponent('POP attached. Amount: R' + total.toLocaleString())}`, '_blank');
+  closePaymentModal();
+}
+
+// 4. WHATSAPP ORDER
+window.sendWhatsAppOrder = function() {
+  if(cart.length === 0) return;
+  let total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  let msg = 'Hello Twinz, new order:\n\n' +
+    cart.map(i => `• ${i.name}\nQty: ${i.qty} | R${i.price*i.qty}`).join('\n\n') +
+    `\n\nTOTAL: R${total.toLocaleString()}\n\nShop: \nAddress: \nPhone: `;
+  window.open(`https://wa.me/27682547352?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// 5. ADMIN HELPERS
+window.copyClientLink = function() {
+  let url = window.location.href.split('?')[0] + '?client=true';
+  navigator.clipboard.writeText(url);
+  document.getElementById('clientLink').value = url;
+  document.getElementById('copyBox').style.display = 'flex';
+}
+window.shareWhatsApp = function() {
+  let url = document.getElementById('clientLink').value;
+  window.open(`https://wa.me/?text=${encodeURIComponent('Order Twinz Atchar: ' + url)}`, '_blank');
+}
+window.openDeliveryTracker = function() {
+  alert('Add your delivery tracking logic here');
+}
+window.generateInvoicePDF = function() {
+  let total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  let w = window.open('', '_blank');
+  w.document.write(`<h2>Twinz Invoice R${total.toLocaleString()}</h2><button onclick="print()">Print PDF</button>`);
+}
+window.sendInvoiceWhatsApp = function() {
+  let name = document.getElementById('clientName').value || 'Customer';
+  let total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  window.open(`https://wa.me/27682547352?text=${encodeURIComponent(`Invoice for ${name}: R${total.toLocaleString()}`)}`, '_blank');
+}
+
+// 6. ADMIN AUTH
 document.addEventListener('DOMContentLoaded', () => {
   const adminPanel = document.getElementById('adminPanel');
   if(adminPanel) {
@@ -271,32 +369,27 @@ document.addEventListener('DOMContentLoaded', () => {
       <div id="adminControls" style="display:none">
         <h4>⚙️ Admin Controls - Live Sync</h4>
         <button class="btn-secondary" onclick="toggleSpecial()">Toggle Monthly Special</button>
-        <button class="btn-blue" onclick="openDeliveryTracker()">Update Delivery Status</button>
         <button class="btn-green" onclick="copyClientLink()">📤 Send Client Link</button>
         <button class="btn-red" onclick="adminLogout()">Logout</button>
         <div class="copy-box" id="copyBox" style="display:none">
           <input type="text" id="clientLink" readonly>
           <button class="btn-whatsapp" onclick="shareWhatsApp()">Share</button>
         </div>
-        <small style="display:block;margin-top:5px;color:var(--muted)">Only logged-in admin can edit stock</small>
+        <small style="display:block;margin-top:5px;color:var(--muted)">Only admin can edit stock</small>
       </div>
     `;
   }
 });
 
-// 2. LOGIN / LOGOUT FUNCTIONS
 window.adminLogin = function() {
   const email = document.getElementById('adminEmail').value;
   const pass = document.getElementById('adminPass').value;
-
   signInWithEmailAndPassword(auth, email, pass)
-   .then(() => alert('Logged in as Admin'))
-   .catch(err => alert('Login failed: ' + err.message));
+ .then(() => alert('Logged in'))
+ .catch(err => alert('Login failed: ' + err.message));
 }
 
-window.adminLogout = function() {
-  signOut(auth);
-}
+window.adminLogout = function() { signOut(auth); }
 
 onAuthStateChanged(auth, (user) => {
   if(user) {
@@ -312,58 +405,42 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// 3. LOCKED FUNCTIONS - only work if logged in
 window.toggleSpecial = function() {
   if(!isAdmin) return alert('Login as admin first');
   let banner = document.getElementById('specialBanner');
-  let newState =!banner.classList.contains('show');
-  set(ref(db, 'catalog/special'), newState);
+  set(ref(db, 'catalog/special'),!banner.classList.contains('show'));
 }
 
 window.toggleStock = function(cardId) {
   if(!isAdmin) return alert('Login as admin first');
   let card = document.getElementById(cardId);
-  let isOOS = card.classList.contains('oos');
-  set(ref(db, 'catalog/stock/' + cardId),!isOOS);
+  set(ref(db, 'catalog/stock/' + cardId),!card.classList.contains('oos'));
 }
-
-//... rest of your cart, WhatsApp, QR code functions stay the same...
-// Paste all your existing cart + invoice + QR functions here unchanged
 
 const specialRef = ref(db, 'catalog/special');
 const stockRef = ref(db, 'catalog/stock');
 
 onValue(specialRef, (snapshot) => {
-  let isActive = snapshot.val();
-  document.getElementById('specialBanner').classList.toggle('show', isActive);
+  document.getElementById('specialBanner').classList.toggle('show', snapshot.val());
   document.getElementById('syncStatus').innerText = '🟢 Live Sync';
 });
-
-onAuthStateChanged(auth, () => {}); // keep listener active
 
 onValue(stockRef, (snapshot) => {
   let stock = snapshot.val() || {};
   document.querySelectorAll('.card[data-id]').forEach(card => {
     let id = card.dataset.id;
     let isOOS = stock[id];
-    if(isOOS) {
-      card.classList.add('oos');
-      let btn = card.querySelector('.btn');
-      if(btn) btn.disabled = true;
-    } else {
-      card.classList.remove('oos');
-      let btn = card.querySelector('.btn');
-      if(btn) btn.disabled = false;
-    }
+    card.classList.toggle('oos', isOOS);
+    let btn = card.querySelector('.btn');
+    if(btn) btn.disabled = isOOS;
   });
   document.getElementById('syncStatus').innerText = '🟢 Synced ' + new Date().toLocaleTimeString();
 });
 
-// INIT - Hide admin in client mode
-if(isClientMode) {
+// 7. HIDE ADMIN FOR CLIENTS
+if(window.location.search.includes('client=true')) {
   document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
 }
 </script>
-
 </body>
 </html>
